@@ -1,8 +1,14 @@
-# Claude Science skills for the NIG supercomputer
+# Agent Skills for the NIG supercomputer
 
-Skills that teach [Claude Science](https://www.anthropic.com/) how to run work
-on the **NIG supercomputer** operated by DDBJ at the National Institute of
-Genetics (Mishima, Japan). They encode the cluster's usage conventions —
+[Agent Skills](https://www.anthropic.com/news/donating-agent-skills-to-the-agentic-ai-foundation)
+(`SKILL.md`) that teach an AI agent how to run work on the **NIG
+supercomputer** operated by DDBJ at the National Institute of Genetics
+(Mishima, Japan). They work with any agent harness that reads `SKILL.md`,
+such as Claude Code, Claude Science, Codex CLI, Gemini CLI and GitHub
+Copilot.
+
+This repository was renamed from `nig-sc/claude-science-skills`; the old URL
+redirects here. They encode the cluster's usage conventions —
 SLURM scheduling, the `/usr/local/biotools` BioContainers/apptainer image
 collection, and the pre-installed databases — so an agent can submit jobs
 correctly instead of guessing.
@@ -12,8 +18,8 @@ there is one skill per zone:
 
 | Skill | Zone | Use it for |
 |-------|------|-----------|
-| [`nig-general-analysis`](./nig-general-analysis/) | General analysis (一般解析区画) | Open, non-personal-genome work. Direct SSH, shared SLURM partitions (`epyc`, `rome`, …), public reference databases. |
-| [`nig-personal-genome`](./nig-personal-genome/) | Personal genome analysis (個人ゲノム解析区画) | Controlled-access human genome data. SSL-VPN + 2FA access, `-pg` accounts, node-lease + shared L40S GPU SLURM, Parabricks, NBDC-compliant data handling. |
+| [`nig-general-analysis`](./skills/nig-general-analysis/) | General analysis (一般解析区画) | Open, non-personal-genome work. Direct SSH, shared SLURM partitions (`epyc`, `rome`, …), public reference databases. |
+| [`nig-personal-genome`](./skills/nig-personal-genome/) | Personal genome analysis (個人ゲノム解析区画) | Controlled-access human genome data. SSL-VPN + 2FA access, `-pg` accounts, node-lease + shared L40S GPU SLURM, Parabricks, NBDC-compliant data handling. |
 
 Each skill is self-contained and covers the same three functional areas for its
 zone: **(a) SLURM / scheduling, (b) tools via `/usr/local/biotools`,
@@ -39,10 +45,29 @@ prevents them from going stale.
 
 ## Installing
 
-These are Claude Science skills. Point your Claude Science skill registry at
-this repository, or copy a skill directory into your skills location. Each
-directory contains a single `SKILL.md` with YAML front-matter (`name`,
-`description`) plus the guidance body.
+Install only the skill for the zone you use.
+
+**Claude Code.** This repository is a Claude Code plugin marketplace, one plugin
+per zone:
+
+```
+/plugin marketplace add nig-sc/nigsc-agent-skills
+/plugin install nig-general-analysis@nigsc-agent-skills
+/plugin install nig-personal-genome@nigsc-agent-skills
+```
+
+`/plugin marketplace update nigsc-agent-skills` fetches later fixes.
+
+**Claude Science.** Point your Claude Science skill registry at this repository,
+or copy a skill directory into your skills location.
+
+**Other harnesses.** Copy the skill directory (for example
+`skills/nig-general-analysis/`, which holds a single `SKILL.md`) into the
+skills directory your harness reads; see your harness's documentation for
+where that is.
+
+Each skill directory contains a single `SKILL.md` with YAML front-matter
+(`name`, `description`) plus the guidance body.
 
 ## Zones at a glance
 

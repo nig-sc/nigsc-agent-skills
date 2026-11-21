@@ -33,21 +33,33 @@ the shared filesystem. The three sections below map to the three things you
 do on this cluster: **(a) run SLURM jobs**, **(b) run tools from
 `/usr/local/biotools`**, **(c) use the pre-installed databases**.
 
-When dispatching from Claude Science, the host is registered as an SSH compute
-target (typically `ssh:nig-a003`). Read `compute_details({provider:'ssh:nig-a003'})`
-first — it accumulates verified partition/account/path facts across sessions —
-then follow the `remote-compute-ssh` skill for the submit → wait → harvest
-mechanics. This skill supplies the NIG-specific content that goes *inside* the
-job script.
+How you reach the cluster depends on the agent harness you run in. This skill
+supplies the NIG-specific content; the harness supplies the transport.
+
+- **A harness that runs shell commands on the user's machine** (Claude Code,
+  Codex CLI, Gemini CLI, GitHub Copilot CLI, …): run every cluster command as
+  `ssh nig-a003 '<command>'`. `nig-a003` is the usual `~/.ssh/config` alias for
+  the a003 interactive node, reached through the gateway `gw.ddbj.nig.ac.jp`
+  with `ProxyJump`; if the user's alias is different, ask for it. Submit work
+  with `ssh nig-a003 'sbatch <script>'` and watch it with
+  `ssh nig-a003 'squeue -u $USER'`. If `ssh` fails because it wants a
+  passphrase or a host-key confirmation, stop and tell the user; never try to
+  answer those prompts yourself.
+- **Claude Science**: the host is registered as an SSH compute target
+  (typically `ssh:nig-a003`). Read `compute_details({provider:'ssh:nig-a003'})`
+  first — it accumulates verified partition/account/path facts across
+  sessions — then follow the `remote-compute-ssh` skill for the submit → wait →
+  harvest mechanics.
 
 ---
 
 ## (a) SLURM — partitions, accounts, submitting
 
 The scheduler is SLURM. Jobs are submitted with `sbatch`; interactive shells
-with `srun`. From Claude Science you normally submit through
-`host.compute.create('ssh:nig-a003').submit_job(...)`, which wraps `sbatch` —
-put the `#SBATCH` directives at the top of the `command` script.
+with `srun`. From a shell harness, run `sbatch` over `ssh` as described above.
+From Claude Science you normally submit through
+`host.compute.create('ssh:nig-a003').submit_job(...)`, which wraps `sbatch`.
+Either way, put the `#SBATCH` directives at the top of the job script.
 
 **Partitions (general zone).**
 
@@ -169,8 +181,9 @@ apptainer exec -B /usr/local/resources:/usr/local/resources \
   blastp -query q.fasta -db /usr/local/shared_data/blastdb/nr -out hits.tsv -outfmt 6
 ```
 
-Keep all inputs and outputs under the job workdir (or a path you bind) so
-Claude Science's harvester can pull the results back.
+Keep all inputs and outputs under the job workdir (or a path you bind) so the
+results can be fetched back — with `scp`/`rsync` from a shell harness, or by
+Claude Science's harvester.
 
 **A complete general-zone job script** (MAFFT → trimAl → IQ-TREE, chained
 through three images):
@@ -244,6 +257,7 @@ apptainer exec -B /usr/local/shared_data:/usr/local/shared_data \
 - **Tools**: `/usr/local/biotools/<letter>/<tool>:<ver>` → `apptainer exec <img> <cmd>`. Search, don't enumerate.
 - **Databases**: `/usr/local/resources/` (archive + mirrors) and `/usr/local/shared_data/` (blastdb, genomes, refseq, uniprot, pdb…). `ls` the root you need; bind with `-B`.
 - **SLURM**: `sinfo -s` is the source of truth (docs lag; nodes get lent out). Default batch partition `epyc`; account usually `general_analysis`; never heavy compute on `login`.
+- **From a shell harness**: `ssh nig-a003 '<command>'` for everything; `sbatch` for anything heavy; stop and ask the user if `ssh` prompts.
 - **From Claude Science**: `compute_details` first, then `remote-compute-ssh` for submit/wait/harvest; put `#SBATCH` + apptainer lines in the job `command`.
 - This is the general zone; controlled human-genome work → `nig-personal-genome`.
 

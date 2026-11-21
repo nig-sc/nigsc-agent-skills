@@ -1,0 +1,25 @@
+{
+  "name": "nigsc-agent-skills",
+  "description": "Agent Skills that teach an AI agent how to use the NIG supercomputer (DDBJ), one plugin per zone.",
+  "owner": {
+    "name": "NIG Supercomputer (DDBJ, National Institute of Genetics)"
+  },
+  "plugins": [
+    {
+      "name": "nig-general-analysis",
+      "source": "./skills/nig-general-analysis",
+      "description": "Run jobs on the NIG supercomputer general analysis zone: SLURM, /usr/local/biotools apptainer images, pre-installed databases.",
+      "skills": [
+        "."
+      ]
+    },
+    {
+      "name": "nig-personal-genome",
+      "source": "./skills/nig-personal-genome",
+      "description": "Run jobs on the NIG supercomputer personal genome analysis zone: SSL-VPN + 2FA access, leased nodes, L40S GPU SLURM, Parabricks, NBDC-compliant data handling.",
+      "skills": [
+        "."
+      ]
+    }
+  ]
+}

@@ -59,12 +59,13 @@ reached **only through an SSL-VPN tunnel**:
   (利用計画表), and adherence to the NBDC human-data guidelines. Even
   non-human-genome GPU work must apply here because the GPUs live in this zone.
 
-> **Claude Science note.** Driving this zone from Claude Science requires a
-> registered SSH compute target that routes *through the SSL-VPN + gateway*.
-> The VPN/2FA step is interactive and per-user; it is not something the agent
-> can complete unattended. If no personal-genome SSH target is configured,
-> author/run against user-provided details rather than assuming general-zone
-> paths carry over.
+> **Agent note.** Whatever harness you run in, the SSL-VPN + two-factor step
+> is interactive and per-user; it is not something the agent can complete
+> unattended, and you must never handle the user's one-time password. From
+> Claude Science, this zone needs a registered SSH compute target that routes
+> *through the SSL-VPN + gateway*. From any harness, if no route into the zone
+> has been set up by the user, author/run against user-provided details rather
+> than assuming general-zone paths carry over.
 
 ---
 
@@ -205,7 +206,7 @@ world-readable path.
 - **SLURM**: default = **dedicated leased node** (own Grid Engine/SLURM). Shared **L40S GPU SLURM** for GPU work: `ssh at022vm02` → `#SBATCH --partition=l40s --account=l40s --gres=gpu:N`; use `--mem=384000` or `--exclusive` to keep a node to yourself.
 - **Tools**: `/usr/local/biotools` apptainer images (same idiom as general zone) + **Parabricks** on L40S for GPU genomics (`pbrun fq2bam`, GPU GATK).
 - **Data**: `scp`/`sftp` to `gwa.ddbj.nig.ac.jp`; Aspera/Archaea for bulk; only outbound HTTPS from inside. **Don't assume general-zone DB paths** — verify on the leased node. JGA = controlled human data under NBDC access approval.
-- **From Claude Science**: needs an SSH target routed through the VPN+gateway; VPN/2FA is interactive. `compute_details` first; `remote-compute-ssh` for mechanics.
+- **From any harness**: VPN/2FA is interactive and belongs to the user; never handle the one-time password. From Claude Science: needs an SSH target routed through the VPN+gateway; `compute_details` first; `remote-compute-ssh` for mechanics.
 
 ---
 
